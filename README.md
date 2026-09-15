@@ -174,10 +174,16 @@ bun run typecheck
 
 Current state: 53 tests pass across 4 files, and `tsc --strict` is clean.
 
-Two checks worth running after any edit to the skills themselves, since neither is enforced by a test:
+The skills themselves are markdown, but two of their invariants fail silently, so they are checked rather than trusted:
 
-- Every `SKILL.md` needs frontmatter whose `name` is kebab-case and matches its directory name. A mismatch means the skill silently never registers.
+```bash
+node scripts/check-skills.mjs
+```
+
+- Every `SKILL.md` needs frontmatter whose `name` is kebab-case, unique, and matching its directory name. A mismatch means the skill never registers, with no error anywhere.
 - Relative links between skills and their `references/` files have to resolve. The playbooks lean on them heavily, and a broken one is invisible until an agent follows it mid-task.
+
+The checker runs on node with no dependencies, so it works on a fresh clone with nothing installed. CI runs it on every push and pull request alongside the bun suite.
 
 ## principles
 
