@@ -338,7 +338,9 @@ function isReviewBot(comment: T.ReviewComment | null): boolean {
     ["bugbot", "claude", "copilot", "coderabbit"].some((name) =>
       author.includes(name)
     ) ||
-    ((author === "github-actions" || author.endsWith("[bot]")) &&
+    ((author === "cursor" ||
+      author === "github-actions" ||
+      author.endsWith("[bot]")) &&
       [
         "bugbot",
         "claude code review",
