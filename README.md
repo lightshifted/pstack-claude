@@ -8,11 +8,19 @@ A port of [pstack](https://github.com/cursor/plugins/tree/main/pstack) by [Laure
 
 ## install
 
-Clone it and point Claude Code at it as a plugin, or symlink the pieces into your user directory:
+Clone it, then symlink the skills and agents into your user directory. Run this from the repo root:
 
 ```bash
-ln -s "$PWD/skills"/* ~/.claude/skills/ && ln -s "$PWD/agents"/* ~/.claude/agents/
+mkdir -p ~/.claude/skills ~/.claude/agents
+for d in "$PWD"/skills/*/;   do ln -sfn "${d%/}" ~/.claude/skills/"$(basename "$d")"; done
+for f in "$PWD"/agents/*.md; do ln -sfn "$f"     ~/.claude/agents/"$(basename "$f")"; done
 ```
+
+That installs 46 skills and 10 agents. The `mkdir` matters, because `~/.claude/skills` does not exist on a fresh install and the link command fails without it. `ln -sfn` rather than `ln -s` so a re-run replaces the links instead of nesting new ones inside the old directories.
+
+Because they are symlinks, editing this repo updates what Claude Code loads. There is no reinstall step.
+
+Claude Code picks the agents up immediately. Skills register on the next session.
 
 ## get started
 
@@ -152,6 +160,24 @@ Every read-only agent sets `disallowedTools: [Edit, Write, NotebookEdit]` rather
 - **The ten-file `docs/guide`.** Cursor-flavored throughout.
 
 Upstream is wired as the `upstream` git remote, so `git fetch upstream` still pulls poteto's changes.
+
+## development
+
+Most of this repo is markdown and needs no toolchain. The exception is `skills/poteto-mode/scripts/`, which holds the `orch` bookkeeping CLI and the `watch-pr` PR watcher. Those are TypeScript on [bun](https://bun.sh).
+
+```bash
+cd skills/poteto-mode/scripts
+bun install --frozen-lockfile
+bun test orch watch-pr
+bun run typecheck
+```
+
+Current state: 53 tests pass across 4 files, and `tsc --strict` is clean.
+
+Two checks worth running after any edit to the skills themselves, since neither is enforced by a test:
+
+- Every `SKILL.md` needs frontmatter whose `name` is kebab-case and matches its directory name. A mismatch means the skill silently never registers.
+- Relative links between skills and their `references/` files have to resolve. The playbooks lean on them heavily, and a broken one is invisible until an agent follows it mid-task.
 
 ## principles
 
