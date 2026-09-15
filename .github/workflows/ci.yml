@@ -1,0 +1,34 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  skills:
+    name: skill invariants
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      # No install step. The checker is dependency-free on purpose, so a broken
+      # lockfile can never be the reason a naming or link break ships.
+      - run: node scripts/check-skills.mjs
+
+  scripts:
+    name: orch and watch-pr
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: skills/poteto-mode/scripts
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+      - run: bun test orch watch-pr
+      - run: bun run typecheck
