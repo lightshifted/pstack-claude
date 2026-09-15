@@ -7,7 +7,8 @@ hooks:
     - matcher: "*"
       hooks:
         - type: command
-          command: "${CLAUDE_PLUGIN_ROOT}/skills/poteto-mode/scripts/mode-reminder.sh"
+          command: >-
+            printf '%s' '{"hookSpecificOutput":{"hookEventName":"UserPromptSubmit","additionalContext":"poteto-mode is active for this session. New task? If a playbook matches or the work needs rigor, apply /poteto-mode. Casual turn, or the user opted out? Stay out of the way."}}'
           statusMessage: "poteto-mode"
 ---
 
